@@ -1,0 +1,7 @@
+api
+private
+secret
+internal
+corp
+development
+production
