@@ -258,7 +258,7 @@ func main() {
 	var token string
 
 	flag.StringVar( &config.domain, "d", "", "domain you are looking for (required)" )
-	flag.BoolVar( &config.extend, "e", false, "also look for <dummy>example.com" )
+	flag.BoolVar( &config.extend, "e", false, "extended mode, also look for <dummy>example.com" )
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
