@@ -53,3 +53,8 @@ If you want to use multiple tokens, you should create a `.tokens` file in the ex
 - find a way to handle panic errors
 - screenshots
 - ?
+
+---
+
+Feel free to ping me on Twitter if you have any problem to use the script.
+https://twitter.com/gwendallecoguic
