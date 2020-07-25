@@ -45,3 +45,10 @@ Usage of github-subdomains:
 ```
 
 If you want to use multiple tokens, you should create a `.tokens` file in the executable directory with 1 token per line.
+
+
+# TODO
+
+- change the order of the extra searches
+- find a way to handle panic errors
+- so many things...
