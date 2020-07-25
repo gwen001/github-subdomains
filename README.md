@@ -10,7 +10,7 @@ If you get access it means that you're part of the GitHub sponsors program.
 The tool will be released as soon as the current goal will be reached.
 For now, you're not allowed to release it, publish it or give access to anyone else.
 
-At the same time, please remember that this program is still under development, bugs and changes may occur.
+Please remember that this program is still under development, bugs and changes may occur.
 
 
 # Install
@@ -51,4 +51,5 @@ If you want to use multiple tokens, you should create a `.tokens` file in the ex
 
 - change the order of the extra searches
 - find a way to handle panic errors
-- so many things...
+- screenshots
+- ?
