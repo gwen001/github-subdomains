@@ -323,7 +323,7 @@ func main() {
 	var wg sync.WaitGroup
 	var max_procs = make(chan bool, 30)
 
-	config.delay = time.Duration( 60.0 / (30*float64(n_token)) * 1000 + 100)
+	config.delay = time.Duration( 60.0 / (30*float64(n_token)) * 1000 + 200)
 	// fmt.Printf("%.3f",config.delay)
 
 	loadLanguages()
@@ -375,7 +375,7 @@ func main() {
 				}
 			}
 
-			fmt.Println(len(t_search))
+			// fmt.Println(len(t_search))
 			if page == 1 {
 				t_search[index].TotalCount = r.TotalCount
 
@@ -390,7 +390,7 @@ func main() {
 					n_search = len(t_search)
 				}
 			}
-			fmt.Println(len(t_search))
+			// fmt.Println(len(t_search))
 
 			for _, i := range r.Items {
 				wg.Add(1)

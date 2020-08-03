@@ -27,6 +27,7 @@ cd github-subdomains
 go install
 ```
 
+
 # Usage
 
 ```
@@ -44,7 +45,12 @@ Usage of github-subdomains:
     	github token (required)
 ```
 
-If you want to use multiple tokens, you should create a `.tokens` file in the executable directory with 1 token per line.
+If you want to use multiple tokens, you should create a `.tokens` file in the executable directory with 1 token per line  
+OR  
+Use an environment variable:  
+```
+export GITHUB_TOKEN=token1,token2,token3...
+```
 
 
 # TODO
