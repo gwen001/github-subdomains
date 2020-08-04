@@ -250,8 +250,8 @@ func main() {
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
-	flag.StringVar( &f_language, "l", "", "language file" )
-	flag.StringVar( &f_noise, "n", "", "noise file" )
+	flag.StringVar( &f_language, "l", "", "language file (optional)" )
+	flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
 	flag.Parse()
 
 	if config.domain == "" {
