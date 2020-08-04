@@ -57,8 +57,9 @@ export GITHUB_TOKEN=token1,token2,token3...
 
 # TODO
 
-- remove tokens from the list when limt reached, re-add them after 1mn
-- change the order of the extra searches
+- remove tokens from the list when limit reached, re-add them after 1mn
+- improve cleanSubdomain function
+- change the order of the extra searches ?
 - find a way to handle panic errors
 - ?
 
@@ -66,6 +67,11 @@ export GITHUB_TOKEN=token1,token2,token3...
 # Changelog
 
 **04/07/2020**
+- moved default languages and noise to source code  
+- added an option for languages and noise  
+- bug fixed in searches with language and noise (empty keyword)  
+- added search signature to avoid duplicate searches with noise  
+- file loading rewritten  
 - preview image added  
 
 **03/07/2020**

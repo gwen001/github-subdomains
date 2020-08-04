@@ -3,20 +3,23 @@ package main
 import (
 	"os"
 	"fmt"
+	"sort"
 	"time"
 	"flag"
 	"sync"
-	"bufio"
 	"regexp"
 	"strings"
-	"io/ioutil"
 	"net/http"
+	"io/ioutil"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/logrusorgru/aurora"
 	tld "github.com/jpillora/go-tld"
 )
 
 type Search struct {
+	signature string
 	keyword string
 	sort string
 	order string
@@ -53,59 +56,44 @@ var config = Config{}
 var t_history_urls []string
 var t_subdomains []string
 var t_search []Search
-var t_languages []string
-var t_noise []string
+var t_languages = []string{"JavaScript","Python","Java","Go","Ruby","PHP","Shell","CSV","Markdown","XML","JSON","Text","CSS","HTML","Perl","ActionScript","Lua","C","C%2B%2B","C%23"}
+var t_noise = []string{"api","private","secret","internal","corp","development","production"}
 
 
 func readTokenFromFile() string {
 
-	fp, err := os.Open(".tokens")
-    defer fp.Close()
+	b, err := ioutil.ReadFile(".tokens")
 
     if err != nil {
         return ""
     }
 
-	var line string
-	var token []string
-    var reader = bufio.NewReader(fp)
+	var t_token []string
 
-    for {
-		line, err = reader.ReadString('\n')
-
-        if err != nil {
-            break
+	for _,l := range strings.Split(string(b), "\n") {
+		l = strings.TrimSpace( l )
+		if len(l) > 0 && !inArray(l,t_token) {
+			t_token = append(t_token, l)
 		}
+	}
 
-		token = append(token, line)
-    }
-
-	return strings.Join(token, ",")
+	return strings.Join(t_token, ",")
 }
 
 
-func loadLanguages() bool {
+func loadLanguages(filename string) bool {
 
-	fp, err := os.Open("languages.txt")
-    defer fp.Close()
+	t_languages = nil
+	b, err := ioutil.ReadFile(filename)
 
     if err != nil {
         return false
     }
 
-	var line string
-    var reader = bufio.NewReader(fp)
-
-    for {
-		line, err = reader.ReadString('\n')
-
-        if err != nil {
-            break
-		}
-
-		line = strings.TrimSpace( line )
-		if len(line) > 0 {
-			t_languages = append(t_languages, line)
+	for _,l := range strings.Split(string(b), "\n") {
+		l = strings.TrimSpace( l )
+		if len(l) > 0 && !inArray(l,t_languages) {
+			t_languages = append(t_languages, l)
 		}
 	}
 
@@ -113,28 +101,19 @@ func loadLanguages() bool {
 }
 
 
-func loadNoise() bool {
+func loadNoise(filename string) bool {
 
-	fp, err := os.Open("noise.txt")
-    defer fp.Close()
+	t_noise = nil
+	b, err := ioutil.ReadFile(filename)
 
     if err != nil {
         return false
     }
 
-	var line string
-    var reader = bufio.NewReader(fp)
-
-    for {
-		line, err = reader.ReadString('\n')
-
-        if err != nil {
-            break
-		}
-
-		line = strings.TrimSpace( line )
-		if len(line) > 0 {
-			t_noise = append(t_noise, line)
+	for _,l := range strings.Split(string(b), "\n") {
+		l = strings.TrimSpace( l )
+		if len(l) > 0 && !inArray(l,t_noise) {
+			t_noise = append(t_noise, l)
 		}
 	}
 
@@ -151,7 +130,7 @@ func githubSearch(token string, current_search Search, page int) response {
 	}
 
 	if len(current_search.noise) > 0 {
-		search = fmt.Sprintf("%s+language:%s", search, current_search.noise)
+		search = fmt.Sprintf("%s+%s", search, strings.Join(current_search.noise,"+"))
 	}
 
 	var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&sort=%s&order=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
@@ -219,6 +198,13 @@ func getCode( i item ) string {
 }
 
 
+func cleanSubdomain(sub []byte) string {
+	var clean_sub = string(sub)
+
+	return clean_sub
+}
+
+
 func doItem(i item) {
 
 	var t_subs [][]byte
@@ -236,7 +222,7 @@ func doItem(i item) {
 		if len(t_subs) > 0 {
 			var print_url = false
 			for _, sub := range t_subs {
-				var str_sub = string(sub)
+				var str_sub = cleanSubdomain( sub )
 				if !inArray(str_sub,t_subdomains) {
 					t_subdomains = append( t_subdomains, str_sub )
 					if !print_url {
@@ -256,12 +242,16 @@ func doItem(i item) {
 func main() {
 
 	var token string
+	var f_language string
+	var f_noise string
 
 	flag.StringVar( &config.domain, "d", "", "domain you are looking for (required)" )
 	flag.BoolVar( &config.extend, "e", false, "extended mode, also look for <dummy>example.com" )
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
+	flag.StringVar( &f_language, "l", "", "language file" )
+	flag.StringVar( &f_noise, "n", "", "noise file" )
 	flag.Parse()
 
 	if config.domain == "" {
@@ -311,6 +301,7 @@ func main() {
 	}
 
 	config.token = strings.Split(token, ",")
+	// fmt.Print(config.token)
 
 	if !config.raw {
 		banner()
@@ -324,10 +315,15 @@ func main() {
 	var max_procs = make(chan bool, 30)
 
 	config.delay = time.Duration( 60.0 / (30*float64(n_token)) * 1000 + 200)
-	// fmt.Printf("%.3f",config.delay)
 
-	loadLanguages()
-	loadNoise()
+	if f_language != "" {
+		loadLanguages( f_language )
+	}
+
+	if f_noise != "" {
+		loadNoise( f_noise )
+	}
+
 	displayConfig()
 
 	t_search = append( t_search, Search{keyword:config.search, sort:"indexed", order:"desc"} )
@@ -342,7 +338,7 @@ func main() {
 
 		current_search = t_search[index]
 		// PrintInfos( "debug", fmt.Sprintf("sort:%s, order:%s, language:%s", s.sort, s.order, s.language) )
-		PrintInfos( "debug", fmt.Sprintf("sort:%s, order:%s, language:%s, noise:%s", current_search.sort, current_search.order, current_search.language, current_search.noise) )
+		PrintInfos( "debug", fmt.Sprintf("keyword:%s, sort:%s, order:%s, language:%s, noise:%s", current_search.keyword, current_search.sort, current_search.order, current_search.language, current_search.noise) )
 
 		page = 1
 
@@ -380,14 +376,18 @@ func main() {
 				t_search[index].TotalCount = r.TotalCount
 
 				if r.TotalCount > 1000 {
-					if current_search.language == "" {
+					if current_search.language == "" && len(t_languages) > 0 {
 						addSearchLanguage( current_search )
-						PrintInfos( "debug", "current search returned too much results, language filter added for later search" )
+						PrintInfos( "debug", fmt.Sprintf("current search returned %d results, language filter added for later search",t_search[index].TotalCount) )
 					} else {
-						addSearchNoise( current_search )
-						PrintInfos( "debug", "current search returned too much results, noise added for later search" )
+						if len(t_noise) > 0 {
+							addSearchNoise( current_search )
+							PrintInfos( "debug", fmt.Sprintf("current search returned %d results, noise added for later search",t_search[index].TotalCount) )
+						}
 					}
 					n_search = len(t_search)
+				} else {
+					PrintInfos( "debug", fmt.Sprintf("current search returned %d results", t_search[index].TotalCount) )
 				}
 			}
 			// fmt.Println(len(t_search))
@@ -419,9 +419,11 @@ func addSearchLanguage( current_search Search ) {
 
 	for _,language := range t_languages {
 		var new_search Search
+		new_search.keyword = current_search.keyword
 		new_search.sort = current_search.sort
 		new_search.order = current_search.order
 		new_search.language = language
+		new_search.signature = generateSignature( new_search )
 		t_search = append( t_search, new_search )
 	}
 }
@@ -432,13 +434,47 @@ func addSearchNoise( current_search Search ) {
 	for _,noise := range t_noise {
 		if !inArray(noise,current_search.noise) {
 			var new_search Search
+			new_search.keyword = current_search.keyword
 			new_search.sort = current_search.sort
 			new_search.order = current_search.order
 			new_search.language = current_search.language
 			new_search.noise = append( current_search.noise, noise )
-			t_search = append( t_search, new_search )
+			new_search.signature = generateSignature( new_search )
+			if !searchExists(new_search.signature) {
+				// PrintInfos( "debug", fmt.Sprintf("search added because signature not found %s",new_search.signature) )
+				t_search = append( t_search, new_search )
+			} else {
+				// PrintInfos( "debug", fmt.Sprintf("search NOT added because signature WAS found %s",new_search.signature) )
+			}
 		}
 	}
+}
+
+
+func searchExists( signature string ) bool {
+	for _,search := range t_search {
+		if signature == search.signature {
+			return true
+		}
+	}
+	return false
+}
+
+
+func generateSignature( s Search ) string {
+
+	var tab = []string{ s.keyword, s.language }
+	sort.Strings(s.noise)
+	tab = append( tab, s.noise... )
+
+	return GetMD5Hash( strings.Join(tab,"||") )
+
+}
+
+
+func GetMD5Hash(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
 
 
