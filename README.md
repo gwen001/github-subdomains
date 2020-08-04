@@ -55,10 +55,21 @@ export GITHUB_TOKEN=token1,token2,token3...
 
 # TODO
 
+- remove tokens from the list when limt reached, re-add them after 1mn
 - change the order of the extra searches
 - find a way to handle panic errors
-- screenshots
 - ?
+
+
+# Changelog
+
+**04/07/2020**
+- preview image added  
+
+**03/07/2020**
+- fixed delay changed 100 -> 200  
+- removed useless debug messages  
+
 
 ---
 
