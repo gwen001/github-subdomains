@@ -70,7 +70,7 @@ export GITHUB_TOKEN=token1,token2,token3...
 
 # Changelog
 
-**04/07/2020**
+**04/08/2020**
 - moved default languages and noise to source code  
 - added an option for languages and noise  
 - bug fixed in searches with language and noise (empty keyword)  
