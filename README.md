@@ -78,7 +78,7 @@ export GITHUB_TOKEN=token1,token2,token3...
 - file loading rewritten  
 - preview image added  
 
-**03/07/2020**
+**03/08/2020**
 - fixed delay changed 100 -> 200  
 - removed useless debug messages  
 
