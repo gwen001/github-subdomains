@@ -19,6 +19,11 @@ import (
 	tld "github.com/jpillora/go-tld"
 )
 
+type Token struct {
+	datoken string
+	disabled_ts int64
+}
+
 type Search struct {
 	signature string
 	keyword string
@@ -33,7 +38,8 @@ type Config struct {
 	domain string
 	output string
 	fpOutput *os.File
-	token []string
+	// token []string
+	tokens []Token
 	extend bool
 	raw bool
 	search string
@@ -60,6 +66,27 @@ var t_search []Search
 var t_languages = []string{"JavaScript","Python","Java","Go","Ruby","PHP","Shell","CSV","Markdown","XML","JSON","Text","CSS","HTML","Perl","ActionScript","Lua","C","C%2B%2B","C%23"}
 var t_noise = []string{"api","private","secret","internal","corp","development","production"}
 
+
+func parseToken( token string ) {
+
+	if token == "" {
+		token = os.Getenv("GITHUB_TOKEN")
+		if token == "" {
+			token = readTokenFromFile()
+			if token == "" {
+				flag.Usage()
+				fmt.Printf("\ntoken not found\n")
+				os.Exit(-1)
+			}
+		}
+	}
+
+	var t_tokens = strings.Split(token, ",")
+
+	for _,t := range t_tokens {
+		config.tokens = append( config.tokens, Token{datoken:t,disabled_ts:0} )
+	}
+}
 
 func readTokenFromFile() string {
 
@@ -256,9 +283,25 @@ func doItem(i item) {
 }
 
 
+func getNextToken( token_index int, n_token int ) int {
+
+	token_index = (token_index+1) % n_token
+
+	for k:=token_index ; k<n_token ; k++ {
+		if config.tokens[k].disabled_ts == 0 || config.tokens[k].disabled_ts < time.Now().Unix() {
+			config.tokens[k].disabled_ts = 0
+			return k
+		}
+	}
+
+	return -1
+}
+
+
 func main() {
 
 	var token string
+	var stop_notoken bool
 	var f_language string
 	var f_noise string
 
@@ -267,6 +310,7 @@ func main() {
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
+	flag.BoolVar( &stop_notoken, "s", false, "stop the program when all tokens have been disabled" )
 	// flag.StringVar( &f_language, "l", "", "language file (optional)" )
 	// flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
 	flag.Parse()
@@ -305,29 +349,13 @@ func main() {
 
 	config.search = "%22" + strings.ReplaceAll(config.search, "-", "%2D") + "%22"
 
-	if token == "" {
-		token = os.Getenv("GITHUB_TOKEN")
-		if token == "" {
-			token = readTokenFromFile()
-			if token == "" {
-				flag.Usage()
-				fmt.Printf("\ntoken not found\n")
-				os.Exit(-1)
-			}
-		}
-	}
-
-	config.token = strings.Split(token, ",")
-	// fmt.Print(config.token)
+	parseToken( token )
 
 	if !config.raw {
 		banner()
 	}
 
-	// var page int
-	var current_token = 0
-	var n_token = len(config.token)
-	var r response
+	var n_token = len(config.tokens)
 	var wg sync.WaitGroup
 	var max_procs = make(chan bool, 30)
 
@@ -346,12 +374,13 @@ func main() {
 	t_search = append( t_search, Search{keyword:config.search, sort:"indexed", order:"desc"} )
 	// t_search = append( t_search, Search{sort:"indexed", order:"asc"} )
 	// t_search = append( t_search, Search{sort:"", order:"desc"} )
+
 	var n_search = len(t_search)
 	var search_index = 0
+	var token_index = -1
 	var current_search Search
 
 	for search_index < n_search {
-	// for k,s := range t_search {
 
 		current_search = t_search[search_index]
 		PrintInfos( "debug", fmt.Sprintf("keyword:%s, sort:%s, order:%s, language:%s, noise:%s", current_search.keyword, current_search.sort, current_search.order, current_search.language, current_search.noise) )
@@ -362,31 +391,41 @@ func main() {
 
 			time.Sleep( config.delay * time.Millisecond )
 
-			var ct = current_token%n_token
-			r = githubSearch( config.token[ct], current_search, page )
-			current_token++
+			// var ct = token_index%n_token
+			token_index = getNextToken( token_index, n_token )
+
+			if token_index < 0 {
+				token_index = -1
+
+				if( stop_notoken ) {
+					PrintInfos("error", "no more token available, exiting")
+					os.Exit(-1)
+				}
+
+				PrintInfos("error", "no more token available, waiting for another available token...")
+				continue
+			}
+
+			var r = githubSearch( config.tokens[token_index].datoken, current_search, page )
 
 			if len(r.Message) > 0 {
-				// fmt.Println(r.Message)
-				// fmt.Println(r.DocumentationUrl)
+				fmt.Println(r.Message)
+				fmt.Println(r.DocumentationUrl)
 				if strings.HasPrefix(r.Message,"Only the first") {
 					// Only the first 1000 search results are available
 					PrintInfos("debug", "search limit reached")
 					break
+				} else if strings.HasPrefix(r.Message,"Bad credentials") {
+					// Bad credentials
+					config.tokens = resliceTokens( config.tokens, token_index )
+					n_token--
 				} else if strings.HasPrefix(r.Message,"You have triggered an abuse detection mechanism") {
 					// You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.
-					PrintInfos("debug", "token limit reached, token removed from the list")
-					config.token = reslice( config.token, ct )
-					n_token--
-					if n_token == 0 {
-						PrintInfos("error", "tokens limit reached, no more token available, exiting...")
-						os.Exit(-1)
-					}
-					continue
+					PrintInfos("debug", "token limit reached, token disabled")
+					config.tokens[token_index].disabled_ts = time.Now().Unix() + 70
 				}
 			}
 
-			// fmt.Println(len(t_search))
 			if page == 1 {
 				t_search[search_index].TotalCount = r.TotalCount
 				max_page = int( math.Ceil( float64(t_search[search_index].TotalCount)/100.00 ) )
@@ -395,19 +434,15 @@ func main() {
 					if current_search.language == "" && len(t_languages) > 0 {
 						addSearchLanguage( current_search )
 						PrintInfos( "debug", fmt.Sprintf("current search returned %d results, language filter added for later search",t_search[search_index].TotalCount) )
-					} else {
-						if len(t_noise) > 0 {
-							addSearchNoise( current_search )
-							PrintInfos( "debug", fmt.Sprintf("current search returned %d results, noise added for later search",t_search[search_index].TotalCount) )
-						}
+					} else if len(t_noise) > 0 {
+						addSearchNoise( current_search )
+						PrintInfos( "debug", fmt.Sprintf("current search returned %d results, noise added for later search",t_search[search_index].TotalCount) )
 					}
 					n_search = len(t_search)
 				} else {
 					PrintInfos( "debug", fmt.Sprintf("current search returned %d results", t_search[search_index].TotalCount) )
 				}
 			}
-			// fmt.Println(len(t_search))
-
 
 			for _, i := range r.Items {
 				wg.Add(1)
@@ -421,7 +456,6 @@ func main() {
 			wg.Wait()
 
 			page++
-			// break
 		}
 
 		search_index++
@@ -518,14 +552,14 @@ func getRawUrl( html_url string ) string {
 }
 
 
-func reslice(s []string, index int) []string {
+func resliceTokens(s []Token, index int) []Token {
     return append(s[:index], s[index+1:]...)
 }
 
 
 func displayConfig() {
 	PrintInfos( "", fmt.Sprintf("Domain:%s, Output:%s",config.domain,config.output) )
-	PrintInfos( "", fmt.Sprintf("Tokens:%d, Delay:%.0fms",len(config.token),float32(config.delay)) )
+	PrintInfos( "", fmt.Sprintf("Tokens:%d, Delay:%.0fms",len(config.tokens),float32(config.delay)) )
 	PrintInfos( "", fmt.Sprintf("Languages:%d, Noise:%d",len(t_languages),len(t_noise)) )
 }
 
