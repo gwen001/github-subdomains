@@ -59,7 +59,7 @@ export GITHUB_TOKEN=token1,token2,token3...
 <img src="https://github.com/gwen001/github-subdomains/raw/master/preview.png">
 
 
-# TODO
+# Todo
 
 - improve cleanSubdomain function
 - change the order of the extra searches ?
