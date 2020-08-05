@@ -250,7 +250,7 @@ func cleanSubdomain(sub []byte) string {
 
 func doItem(i item) {
 
-	var t_subs [][]byte
+	var t_match [][]byte
 
 	if inArray(i.HtmlUrl,t_history_urls) {
 		// PrintInfos( "debug", fmt.Sprintf("url already checked: %s",i.HtmlUrl) )
@@ -260,11 +260,11 @@ func doItem(i item) {
 		t_history_urls = append(t_history_urls, i.HtmlUrl)
 
 		var code = getCode( i )
-		t_subs = performRegexp( code, config.DomainRegexp )
+		t_match = performRegexp( code, config.DomainRegexp )
 
-		if len(t_subs) > 0 {
+		if len(t_match) > 0 {
 			var print_url = false
-			for _, sub := range t_subs {
+			for _, sub := range t_match {
 				var str_sub = cleanSubdomain( sub )
 				if !inArray(str_sub,t_subdomains) {
 					t_subdomains = append( t_subdomains, str_sub )
