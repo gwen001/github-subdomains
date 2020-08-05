@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"fmt"
+	"math"
 	"sort"
 	"time"
 	"flag"
@@ -87,7 +88,8 @@ func loadLanguages(filename string) bool {
 	b, err := ioutil.ReadFile(filename)
 
     if err != nil {
-        return false
+		PrintInfos( "error", fmt.Sprintf("can't open language file: %s",filename) )
+        os.Exit(-1)
     }
 
 	for _,l := range strings.Split(string(b), "\n") {
@@ -107,7 +109,8 @@ func loadNoise(filename string) bool {
 	b, err := ioutil.ReadFile(filename)
 
     if err != nil {
-        return false
+		PrintInfos( "error", fmt.Sprintf("can't open noise file: %s",filename) )
+        os.Exit(-1)
     }
 
 	for _,l := range strings.Split(string(b), "\n") {
@@ -123,6 +126,12 @@ func loadNoise(filename string) bool {
 
 func githubSearch(token string, current_search Search, page int) response {
 
+	defer func() {
+        if r := recover(); r != nil {
+            // fmt.Println("Recovered in f", r)
+        }
+    }()
+
 	var search = current_search.keyword
 
 	if len(current_search.language) > 0 {
@@ -134,20 +143,21 @@ func githubSearch(token string, current_search Search, page int) response {
 	}
 
 	var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&sort=%s&order=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
+	// url = fmt.Sprintf("http://gitgrep.me/s.php" )
 	PrintInfos( "debug", url )
 
 	client := http.Client{ Timeout: time.Second * 5 }
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println(err)
+		PrintInfos( "error", fmt.Sprintf("%s",err) )
 	}
 
 	req.Header.Set("Authorization", "token "+token)
 
 	res, getErr := client.Do(req)
 	if getErr != nil {
-		fmt.Println(getErr)
+		PrintInfos( "error", fmt.Sprintf("%s",getErr) )
 	}
 
 	if res.Body != nil {
@@ -156,13 +166,13 @@ func githubSearch(token string, current_search Search, page int) response {
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
-		fmt.Println(readErr)
+		PrintInfos( "error", fmt.Sprintf("%s",readErr) )
 	}
 
 	r := response{}
 	jsonErr := json.Unmarshal(body, &r)
 	if jsonErr != nil {
-		fmt.Println(jsonErr)
+		PrintInfos( "error", fmt.Sprintf("%s",jsonErr) )
 	}
 
 	return r
@@ -170,6 +180,13 @@ func githubSearch(token string, current_search Search, page int) response {
 
 
 func getCode( i item ) string {
+
+	defer func() {
+        if r := recover(); r != nil {
+            // fmt.Println("Recovered in f", r)
+        }
+    }()
+
 	var raw_url = getRawUrl(i.HtmlUrl)
 	// PrintInfos("debug", raw_url)
 
@@ -177,12 +194,12 @@ func getCode( i item ) string {
 
 	req, err := http.NewRequest("GET", raw_url, nil)
 	if err != nil {
-		fmt.Println(err)
+		PrintInfos( "error", fmt.Sprintf("%s",err) )
 	}
 
 	res, getErr := client.Do(req)
 	if getErr != nil {
-		fmt.Println(getErr)
+		PrintInfos( "error", fmt.Sprintf("%s",getErr) )
 	}
 
 	if res.Body != nil {
@@ -191,7 +208,7 @@ func getCode( i item ) string {
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
-		fmt.Println(readErr)
+		PrintInfos( "error", fmt.Sprintf("%s",readErr) )
 	}
 
 	return string(body)
@@ -250,8 +267,8 @@ func main() {
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
-	flag.StringVar( &f_language, "l", "", "language file (optional)" )
-	flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
+	// flag.StringVar( &f_language, "l", "", "language file (optional)" )
+	// flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
 	flag.Parse()
 
 	if config.domain == "" {
@@ -307,7 +324,7 @@ func main() {
 		banner()
 	}
 
-	var page int
+	// var page int
 	var current_token = 0
 	var n_token = len(config.token)
 	var r response
@@ -330,19 +347,19 @@ func main() {
 	// t_search = append( t_search, Search{sort:"indexed", order:"asc"} )
 	// t_search = append( t_search, Search{sort:"", order:"desc"} )
 	var n_search = len(t_search)
-	var index = 0
+	var search_index = 0
 	var current_search Search
 
-	for index < n_search {
+	for search_index < n_search {
 	// for k,s := range t_search {
 
-		current_search = t_search[index]
+		current_search = t_search[search_index]
 		// PrintInfos( "debug", fmt.Sprintf("sort:%s, order:%s, language:%s", s.sort, s.order, s.language) )
 		PrintInfos( "debug", fmt.Sprintf("keyword:%s, sort:%s, order:%s, language:%s, noise:%s", current_search.keyword, current_search.sort, current_search.order, current_search.language, current_search.noise) )
 
-		page = 1
+		var max_page = 1
 
-		for {
+		for page:=1; page<=max_page; {
 
 			time.Sleep( config.delay * time.Millisecond )
 
@@ -373,24 +390,26 @@ func main() {
 
 			// fmt.Println(len(t_search))
 			if page == 1 {
-				t_search[index].TotalCount = r.TotalCount
+				t_search[search_index].TotalCount = r.TotalCount
+				max_page = int( math.Ceil( float64(t_search[search_index].TotalCount)/100.00 ) )
 
 				if r.TotalCount > 1000 {
 					if current_search.language == "" && len(t_languages) > 0 {
 						addSearchLanguage( current_search )
-						PrintInfos( "debug", fmt.Sprintf("current search returned %d results, language filter added for later search",t_search[index].TotalCount) )
+						PrintInfos( "debug", fmt.Sprintf("current search returned %d results, language filter added for later search",t_search[search_index].TotalCount) )
 					} else {
 						if len(t_noise) > 0 {
 							addSearchNoise( current_search )
-							PrintInfos( "debug", fmt.Sprintf("current search returned %d results, noise added for later search",t_search[index].TotalCount) )
+							PrintInfos( "debug", fmt.Sprintf("current search returned %d results, noise added for later search",t_search[search_index].TotalCount) )
 						}
 					}
 					n_search = len(t_search)
 				} else {
-					PrintInfos( "debug", fmt.Sprintf("current search returned %d results", t_search[index].TotalCount) )
+					PrintInfos( "debug", fmt.Sprintf("current search returned %d results", t_search[search_index].TotalCount) )
 				}
 			}
 			// fmt.Println(len(t_search))
+
 
 			for _, i := range r.Items {
 				wg.Add(1)
@@ -407,7 +426,7 @@ func main() {
 			// break
 		}
 
-		index++
+		search_index++
 	}
 
 	PrintInfos( "", fmt.Sprintf("%d searches performed",n_search) )
@@ -507,7 +526,8 @@ func reslice(s []string, index int) []string {
 
 
 func displayConfig() {
-	PrintInfos( "", fmt.Sprintf("Domain:%s, Output:%s, Tokens:%d, Delay:%.0fms",config.domain,config.output,len(config.token),float32(config.delay)) )
+	PrintInfos( "", fmt.Sprintf("Domain:%s, Output:%s",config.domain,config.output) )
+	PrintInfos( "", fmt.Sprintf("Tokens:%d, Delay:%.0fms",len(config.token),float32(config.delay)) )
 	PrintInfos( "", fmt.Sprintf("Languages:%d, Noise:%d",len(t_languages),len(t_noise)) )
 }
 

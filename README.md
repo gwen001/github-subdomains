@@ -64,11 +64,15 @@ export GITHUB_TOKEN=token1,token2,token3...
 - remove tokens from the list when limit reached, re-add them after 1mn
 - improve cleanSubdomain function
 - change the order of the extra searches ?
-- find a way to handle panic errors
 - ?
 
 
 # Changelog
+
+**05/08/2020**
+- removed options for languages and noise  
+- better page management  
+- panic errors handled  
 
 **04/08/2020**
 - moved default languages and noise to source code  
