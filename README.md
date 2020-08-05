@@ -37,10 +37,6 @@ Usage of github-subdomains:
   -d string
     	domain you are looking for (required)
   -e	extended mode, also look for <dummy>example.com
-  -l string
-    	language file (optional)
-  -n string
-    	noise file (optional)
   -o string
     	output file, default: <domain>.txt
   -raw

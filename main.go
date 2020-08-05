@@ -170,7 +170,6 @@ func githubSearch(token string, current_search Search, page int) response {
 	}
 
 	var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&sort=%s&order=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
-	// url = fmt.Sprintf("http://gitgrep.me/s.php" )
 	PrintInfos( "debug", url )
 
 	client := http.Client{ Timeout: time.Second * 5 }
@@ -310,7 +309,7 @@ func main() {
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
 	flag.StringVar( &token, "t", "", "github token (required)" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
-	flag.BoolVar( &stop_notoken, "s", false, "stop the program when all tokens have been disabled" )
+	flag.BoolVar( &stop_notoken, "k", false, "exit the program when all tokens have been disabled" )
 	// flag.StringVar( &f_language, "l", "", "language file (optional)" )
 	// flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
 	flag.Parse()
