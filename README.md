@@ -61,7 +61,7 @@ export GITHUB_TOKEN=token1,token2,token3...
 
 # TODO
 
-- remove tokens from the list when limit reached, re-add them after 1mn
+- <strike>remove tokens from the list when limit reached, re-add them after 1mn</strike> needless since delay is based on n token/mn
 - improve cleanSubdomain function
 - change the order of the extra searches ?
 - ?
