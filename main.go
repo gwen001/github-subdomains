@@ -354,7 +354,6 @@ func main() {
 	// for k,s := range t_search {
 
 		current_search = t_search[search_index]
-		// PrintInfos( "debug", fmt.Sprintf("sort:%s, order:%s, language:%s", s.sort, s.order, s.language) )
 		PrintInfos( "debug", fmt.Sprintf("keyword:%s, sort:%s, order:%s, language:%s, noise:%s", current_search.keyword, current_search.sort, current_search.order, current_search.language, current_search.noise) )
 
 		var max_page = 1
@@ -365,7 +364,6 @@ func main() {
 
 			var ct = current_token%n_token
 			r = githubSearch( config.token[ct], current_search, page )
-			// r = githubSearch( config.token[ct], config.search, page, s.sort, s.order, s.language )
 			current_token++
 
 			if len(r.Message) > 0 {
