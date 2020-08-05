@@ -260,7 +260,7 @@ func doItem(i item) {
 		t_history_urls = append(t_history_urls, i.HtmlUrl)
 
 		var code = getCode( i )
-		t_subs = extractSubdomains( code, config.DomainRegexp )
+		t_subs = performRegexp( code, config.DomainRegexp )
 
 		if len(t_subs) > 0 {
 			var print_url = false
@@ -538,7 +538,7 @@ func inArray(str string, array []string) bool {
 }
 
 
-func extractSubdomains(code string, domain_regexp *regexp.Regexp ) [][]byte {
+func performRegexp(code string, domain_regexp *regexp.Regexp ) [][]byte {
 	return domain_regexp.FindAll([]byte(code), -1)
 }
 
