@@ -264,16 +264,16 @@ func doItem(i item) {
 
 		if len(t_match) > 0 {
 			var print_url = false
-			for _, sub := range t_match {
-				var str_sub = cleanSubdomain( sub )
-				if !inArray(str_sub,t_subdomains) {
-					t_subdomains = append( t_subdomains, str_sub )
+			for _, match := range t_match {
+				var str_match = cleanSubdomain( match )
+				if !inArray(str_match,t_subdomains) {
+					t_subdomains = append( t_subdomains, str_match )
 					if !print_url {
 						print_url = true
 						PrintInfos( "info", i.HtmlUrl )
 					}
-					PrintInfos( "found", str_sub )
-					config.fpOutput.WriteString(str_sub+"\n")
+					PrintInfos( "found", str_match )
+					config.fpOutput.WriteString(str_match+"\n")
 					config.fpOutput.Sync()
 				}
 			}
