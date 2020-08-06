@@ -37,6 +37,7 @@ Usage of github-subdomains:
   -d string
     	domain you are looking for (required)
   -e	extended mode, also look for <dummy>example.com
+  -k	exit the program when all tokens have been disabled
   -o string
     	output file, default: <domain>.txt
   -raw
