@@ -70,6 +70,7 @@ export GITHUB_TOKEN=token1,token2...
 # Changelog
 
 **06/08/2020**
+- max_page set forced to 10 to save 1 request for every search
 - new banner (easier to maintain)
 - removed `_` from the regexps
 - extended regexp fixed

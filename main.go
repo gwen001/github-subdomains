@@ -427,6 +427,9 @@ func main() {
 			if page == 1 {
 				t_search[search_index].TotalCount = r.TotalCount
 				max_page = int( math.Ceil( float64(t_search[search_index].TotalCount)/100.00 ) )
+				if max_page > 10 {
+					max_page = 10
+				}
 
 				if r.TotalCount > 1000 {
 					if current_search.language == "" && len(t_languages) > 0 {
