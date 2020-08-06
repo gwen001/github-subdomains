@@ -70,29 +70,29 @@ export GITHUB_TOKEN=token1,token2...
 # Changelog
 
 **06/08/2020**
-- new banner (easier to maintain)  
-- removed `_` from the regexp  
-- extended regexp fixed  
-- improved cleaning function  
+- new banner (easier to maintain)
+- removed `_` from the regexps
+- extended regexp fixed
+- improved cleaning function
 
 **05/08/2020**
-- added an option to exit the program when all tokens have been disabled instead of waiting  
-- rate limited tokens are disabled for 1mn then re-enabled  
-- removed options for languages and noise  
-- better page management  
-- panic errors handled  
+- added an option to exit the program when all tokens have been disabled instead of waiting
+- rate limited tokens are disabled for 1mn then re-enabled
+- removed options for languages and noise
+- better page management
+- panic errors handled
 
 **04/08/2020**
-- moved default languages and noise to source code  
-- added an option for languages and noise  
-- bug fixed in searches with language and noise (empty keyword)  
-- added search signature to avoid duplicate searches with noise  
-- file loading rewritten  
-- preview image added  
+- moved default languages and noise to source code
+- added an option for languages and noise
+- bug fixed in searches with language and noise (empty keyword)
+- added search signature to avoid duplicate searches with noise
+- file loading rewritten
+- preview image added
 
 **03/08/2020**
-- fixed delay changed 100 -> 200  
-- removed useless debug messages  
+- fixed delay changed 100 -> 200
+- removed useless debug messages
 
 
 ---
