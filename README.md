@@ -51,8 +51,7 @@ token1
 token2
 ...
 ```
-or  
-Use an environment variable with tokens separated by comma:  
+or use an environment variable with tokens separated by comma:  
 ```
 export GITHUB_TOKEN=token1,token2...
 ```
