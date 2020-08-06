@@ -46,10 +46,15 @@ Usage of github-subdomains:
 ```
 
 If you want to use multiple tokens, you should create a `.tokens` file in the executable directory with 1 token per line  
-OR  
-Use an environment variable:  
 ```
-export GITHUB_TOKEN=token1,token2,token3...
+token1
+token2
+...
+```
+or  
+Use an environment variable with tokens separated by comma:  
+```
+export GITHUB_TOKEN=token1,token2...
 ```
 
 <img src="https://github.com/gwen001/github-subdomains/raw/master/preview.png">
@@ -63,6 +68,12 @@ export GITHUB_TOKEN=token1,token2,token3...
 
 
 # Changelog
+
+**06/08/2020**
+- new banner (easier to maintain)  
+- removed `_` from the regexp  
+- extended regexp fixed  
+- improved cleaning function  
 
 **05/08/2020**
 - added an option to exit the program when all tokens have been disabled instead of waiting  

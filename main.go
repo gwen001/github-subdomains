@@ -10,6 +10,7 @@ import (
 	"sync"
 	"regexp"
 	"strings"
+	"net/url"
 	"net/http"
 	"io/ioutil"
 	"crypto/md5"
@@ -214,7 +215,6 @@ func getCode( i item ) string {
     }()
 
 	var raw_url = getRawUrl(i.HtmlUrl)
-	// PrintInfos("debug", raw_url)
 
 	client := http.Client{ Timeout: time.Second * 5 }
 
@@ -243,6 +243,8 @@ func getCode( i item ) string {
 
 func cleanSubdomain(sub []byte) string {
 	var clean_sub = string(sub)
+	clean_sub = strings.ToLower( clean_sub )
+	clean_sub = strings.TrimLeft( clean_sub, "." )
 
 	return clean_sub
 }
@@ -256,7 +258,6 @@ func doItem(i item) {
 		// PrintInfos( "debug", fmt.Sprintf("url already checked: %s",i.HtmlUrl) )
 	} else {
 
-		// PrintInfos( "debug", i.HtmlUrl )
 		t_history_urls = append(t_history_urls, i.HtmlUrl)
 
 		var code = getCode( i )
@@ -338,15 +339,13 @@ func main() {
 
 	if config.extend {
 		config.search = u.Domain
-		config.DomainRegexp = regexp.MustCompile( `[0-9a-z_\-\.]+\.` + u.Domain )
-		// domain_regexp = r'([0-9a-z_\-\.]+\.([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
+		config.DomainRegexp = regexp.MustCompile( `(?i)[0-9a-z\-\.]+\.([0-9a-z\-]+)?`+u.Domain+`([0-9a-z\-\.]+)?\.[a-z]{1,5}`)
 	} else {
 		config.search = u.Domain + "." + u.TLD
-		config.DomainRegexp = regexp.MustCompile( `[0-9a-z_\-\.]+\.` + u.Domain + "\\." + u.TLD )
-		// domain_regexp = r'(([0-9a-z_\-\.]+)\.' + _domain.replace('.','\.')+')'
+		config.DomainRegexp = regexp.MustCompile( `(?i)[0-9a-z\-\.]+\.` + u.Domain + "\\." + u.TLD )
 	}
 
-	config.search = "%22" + strings.ReplaceAll(config.search, "-", "%2D") + "%22"
+	config.search = "%22" + strings.ReplaceAll(url.QueryEscape(config.search), "-", "%2D") + "%22"
 
 	parseToken( token )
 
@@ -408,8 +407,8 @@ func main() {
 			var r = githubSearch( config.tokens[token_index].datoken, current_search, page )
 
 			if len(r.Message) > 0 {
-				fmt.Println(r.Message)
-				fmt.Println(r.DocumentationUrl)
+				// fmt.Println(r.Message)
+				// fmt.Println(r.DocumentationUrl)
 				if strings.HasPrefix(r.Message,"Only the first") {
 					// Only the first 1000 search results are available
 					PrintInfos("debug", "search limit reached")
@@ -588,18 +587,24 @@ func PrintInfos(infos_type string, str string) {
 
 func banner() {
 	fmt.Print("\n")
-	fmt.Print(au.BrightMagenta(`        █▀▀`))
-	fmt.Print(au.BrightWhite(` ▀█▀ ▀█▀ █ █ █ █ █▀▄   `))
-	fmt.Print(au.BrightMagenta(`█▀▀`))
-	fmt.Println(au.BrightWhite(` █ █ █▀▄ █▀▄ █▀█ █▄█ █▀█ ▀█▀ █▀█ █▀▀`))
-	fmt.Print(au.BrightMagenta(`        █ █`))
-	fmt.Print(au.BrightWhite(`  █   █  █▀█ █ █ █▀▄   `))
-	fmt.Print(au.BrightMagenta(`▀▀█`))
-	fmt.Println(au.BrightWhite(` █ █ █▀▄ █ █ █ █ █ █ █▀█  █  █ █ ▀▀█`))
-	fmt.Print(au.BrightMagenta(`        ▀▀▀`))
-	fmt.Print(au.BrightWhite(` ▀▀▀  ▀  ▀ ▀ ▀▀▀ ▀▀    `))
-	fmt.Print(au.BrightMagenta(`▀▀▀`))
-	fmt.Print(au.BrightWhite(` ▀▀▀ ▀▀  ▀▀  ▀▀▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀
-	`))
-	fmt.Print("                    by @gwendallecoguic                          \n\n")
+	fmt.Print(`
+	   ▗▐  ▌     ▌          ▌    ▌          ▗
+	▞▀▌▄▜▀ ▛▀▖▌ ▌▛▀▖  ▞▀▘▌ ▌▛▀▖▞▀▌▞▀▖▛▚▀▖▝▀▖▄ ▛▀▖▞▀▘
+	▚▄▌▐▐ ▖▌ ▌▌ ▌▌ ▌  ▝▀▖▌ ▌▌ ▌▌ ▌▌ ▌▌▐ ▌▞▀▌▐ ▌ ▌▝▀▖
+	▗▄▘▀▘▀ ▘ ▘▝▀▘▀▀   ▀▀ ▝▀▘▀▀ ▝▀▘▝▀ ▘▝ ▘▝▀▘▀▘▘ ▘▀▀
+	`)
+	// fmt.Print(au.BrightMagenta(`        █▀▀`))
+	// fmt.Print(au.BrightWhite(` ▀█▀ ▀█▀ █ █ █ █ █▀▄   `))
+	// fmt.Print(au.BrightMagenta(`█▀▀`))
+	// fmt.Println(au.BrightWhite(` █ █ █▀▄ █▀▄ █▀█ █▄█ █▀█ ▀█▀ █▀█ █▀▀`))
+	// fmt.Print(au.BrightMagenta(`        █ █`))
+	// fmt.Print(au.BrightWhite(`  █   █  █▀█ █ █ █▀▄   `))
+	// fmt.Print(au.BrightMagenta(`▀▀█`))
+	// fmt.Println(au.BrightWhite(` █ █ █▀▄ █ █ █ █ █ █ █▀█  █  █ █ ▀▀█`))
+	// fmt.Print(au.BrightMagenta(`        ▀▀▀`))
+	// fmt.Print(au.BrightWhite(` ▀▀▀  ▀  ▀ ▀ ▀▀▀ ▀▀    `))
+	// fmt.Print(au.BrightMagenta(`▀▀▀`))
+	// fmt.Print(au.BrightWhite(` ▀▀▀ ▀▀  ▀▀  ▀▀▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀
+	// `))
+	fmt.Print("       by @gwendallecoguic                          \n\n")
 }
