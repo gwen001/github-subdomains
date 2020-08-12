@@ -7,7 +7,6 @@ Find subdomains on GitHub.
 
 This repository is not public yet.
 If you get access it means that you're part of the GitHub sponsors program.
-The tool will be released as soon as the current goal will be reached.
 For now, you're not allowed to release it, publish it or give access to anyone else.
 
 Please remember that this program is still under development, bugs and changes may occur.
@@ -62,12 +61,14 @@ export GITHUB_TOKEN=token1,token2...
 
 # Todo
 
-- improve cleanSubdomain function
 - change the order of the extra searches ?
 - ?
 
 
 # Changelog
+
+**12/08/2020**
+- improved clean function
 
 **06/08/2020**
 - max_page set forced to 10 to save 1 request for every search

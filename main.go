@@ -39,7 +39,6 @@ type Config struct {
 	domain string
 	output string
 	fpOutput *os.File
-	// token []string
 	tokens []Token
 	extend bool
 	raw bool
@@ -245,6 +244,11 @@ func cleanSubdomain(sub []byte) string {
 	var clean_sub = string(sub)
 	clean_sub = strings.ToLower( clean_sub )
 	clean_sub = strings.TrimLeft( clean_sub, "." )
+	if strings.Index(clean_sub,"2f") == 0 {
+		clean_sub = clean_sub[2:]
+	}
+	var re = regexp.MustCompile( `^u00[0-9a-f][0-9a-f]` )
+	clean_sub = re.ReplaceAllString( clean_sub, "" )
 
 	return clean_sub
 }
@@ -540,8 +544,8 @@ func inArray(str string, array []string) bool {
 }
 
 
-func performRegexp(code string, domain_regexp *regexp.Regexp ) [][]byte {
-	return domain_regexp.FindAll([]byte(code), -1)
+func performRegexp(code string, rgxp *regexp.Regexp ) [][]byte {
+	return rgxp.FindAll([]byte(code), -1)
 }
 
 
@@ -596,18 +600,5 @@ func banner() {
 	▚▄▌▐▐ ▖▌ ▌▌ ▌▌ ▌  ▝▀▖▌ ▌▌ ▌▌ ▌▌ ▌▌▐ ▌▞▀▌▐ ▌ ▌▝▀▖
 	▗▄▘▀▘▀ ▘ ▘▝▀▘▀▀   ▀▀ ▝▀▘▀▀ ▝▀▘▝▀ ▘▝ ▘▝▀▘▀▘▘ ▘▀▀
 	`)
-	// fmt.Print(au.BrightMagenta(`        █▀▀`))
-	// fmt.Print(au.BrightWhite(` ▀█▀ ▀█▀ █ █ █ █ █▀▄   `))
-	// fmt.Print(au.BrightMagenta(`█▀▀`))
-	// fmt.Println(au.BrightWhite(` █ █ █▀▄ █▀▄ █▀█ █▄█ █▀█ ▀█▀ █▀█ █▀▀`))
-	// fmt.Print(au.BrightMagenta(`        █ █`))
-	// fmt.Print(au.BrightWhite(`  █   █  █▀█ █ █ █▀▄   `))
-	// fmt.Print(au.BrightMagenta(`▀▀█`))
-	// fmt.Println(au.BrightWhite(` █ █ █▀▄ █ █ █ █ █ █ █▀█  █  █ █ ▀▀█`))
-	// fmt.Print(au.BrightMagenta(`        ▀▀▀`))
-	// fmt.Print(au.BrightWhite(` ▀▀▀  ▀  ▀ ▀ ▀▀▀ ▀▀    `))
-	// fmt.Print(au.BrightMagenta(`▀▀▀`))
-	// fmt.Print(au.BrightWhite(` ▀▀▀ ▀▀  ▀▀  ▀▀▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀
-	// `))
 	fmt.Print("       by @gwendallecoguic                          \n\n")
 }
