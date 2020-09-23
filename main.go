@@ -169,7 +169,8 @@ func githubSearch(token string, current_search Search, page int) response {
 		search = fmt.Sprintf("%s+%s", search, strings.Join(current_search.noise,"+"))
 	}
 
-	var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&sort=%s&order=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
+	// var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&sort=%s&order=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
+	var url = fmt.Sprintf("https://api.github.com/search/code?per_page=100&s=%s&type=Code&o=%s&q=%s&page=%d", current_search.sort, current_search.order, search, page )
 	PrintInfos( "debug", url )
 
 	client := http.Client{ Timeout: time.Second * 5 }
