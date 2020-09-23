@@ -67,6 +67,10 @@ export GITHUB_TOKEN=token1,token2...
 
 # Changelog
 
+**23/09/2020**
+- fixed an issue in the api call
+- added binary
+
 **12/08/2020**
 - improved clean function
 
