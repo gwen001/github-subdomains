@@ -313,7 +313,7 @@ func main() {
 	flag.StringVar(&token, "t", "", "github token (required)")
 	flag.StringVar(&config.output, "o", "", "output file, default: <domain>.txt")
 	flag.BoolVar(&stop_notoken, "k", false, "exit the program when all tokens have been disabled")
-	flag.StringVar(&config.file, "c", "", "Configuration file (put the tokens there).")
+	flag.StringVar(&config.file, "c", "", "Configuration file (put the tokens there). If .tokens file is found, then that file is used.")
 	// flag.StringVar( &f_language, "l", "", "language file (optional)" )
 	// flag.StringVar( &f_noise, "n", "", "noise file (optional)" )
 	flag.Parse()
