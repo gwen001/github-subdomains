@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"time"
 	"flag"
@@ -97,6 +98,13 @@ func parseToken( token string ) {
 			config.tokens = append( config.tokens, Token{datoken:t,disabled_ts:0} )
 		}
 	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(config.tokens), func(i, j int) { config.tokens[i], config.tokens[j] = config.tokens[j], config.tokens[i] })
+
+	// for _,t := range config.tokens {
+	// 	fmt.Println(t)
+	// }
 }
 
 func readTokenFromFile( tokenfile string ) string {
