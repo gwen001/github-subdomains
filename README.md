@@ -25,7 +25,7 @@ go install
 # Usage
 
 ```
-github-subdomains -h
+$ github-subdomains -h
 
 Usage of github-subdomains:
   -d string
