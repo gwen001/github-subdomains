@@ -1,12 +1,20 @@
+<h1 align="center">github-subdomains</h1>
+
+<h4 align="center">Find subdomains on GitHub.</h4>
+
 <p align="left">
     <img src="https://img.shields.io/badge/go-v1.13-blue" alt="go badge">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license badge">
     <a href="https://twitter.com/intent/tweet?text=https%3a%2f%2fgithub.com%2fgwen001%2fgithub-subdomains%2f" target="_blank"><img src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fgwen001%2Fgithub-subdomains" alt="twitter badge"></a>
 </p>
 
-# github-subdomains
+<p align="center">
+    <img src="https://img.shields.io/github/stars/gwen001/github-subdomains?style=social" alt="github stars badge">
+    <img src="https://img.shields.io/github/watchers/gwen001/github-subdomains?style=social" alt="github watchers badge">
+    <img src="https://img.shields.io/github/forks/gwen001/github-subdomains?style=social" alt="github forks badge">
+</p>
 
-Find subdomains on GitHub.
+---
 
 # Install
 
