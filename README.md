@@ -16,7 +16,7 @@
 
 ---
 
-# Install
+## Install
 
 ```
 go install github.com/gwen001/github-subdomains@latest
@@ -30,7 +30,7 @@ cd github-subdomains
 go install
 ```
 
-# Usage
+## Usage
 
 ```
 $ github-subdomains -h
@@ -38,7 +38,7 @@ $ github-subdomains -h
 Usage of github-subdomains:
   -d string
     	domain you are looking for (required)
-  -e	extended mode, also look for <dummy>example.com
+  -e	extended mode, also look for <dummy>example.<tld>
   -k	exit the program when all tokens have been disabled
   -o string
     	output file, default: <domain>.txt
@@ -48,7 +48,7 @@ Usage of github-subdomains:
     	github token (required), can be:
     	  • a single token
     	  • a list of tokens separated by comma
-    	  • a file containing 1 token per line
+    	  • a file (.tokens) containing 1 token per line
     	if the options is not provided, the environment variable GITHUB_TOKEN is readed, it can be:
     	  • a single token
     	  • a list of tokens separated by comma
@@ -70,12 +70,12 @@ You can disable that feature by using the option `-k`.
 
 <img src="https://github.com/gwen001/github-subdomains/raw/master/preview.png">
 
-# Todo
+## Todo
 
 - change the order of the extra searches ?
 - ?
 
-# Changelog
+## Changelog
 
 **20/09/2022**
 - fix regexp for subdomains

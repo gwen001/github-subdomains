@@ -345,7 +345,7 @@ func main() {
 	flag.StringVar( &config.domain, "d", "", "domain you are looking for (required)" )
 	flag.BoolVar( &config.extend, "e", false, "extended mode, also look for <dummy>example.com" )
 	flag.BoolVar( &config.raw, "raw", false, "raw output" )
-	flag.StringVar( &token, "t", "", "github token (required), can be:\n  • a single token\n  • a list of tokens separated by comma\n  • a file containing 1 token per line\nif the options is not provided, the environment variable GITHUB_TOKEN is readed, it can be:\n  • a single token\n  • a list of tokens separated by comma" )
+	flag.StringVar( &token, "t", "", "github token (required), can be:\n  • a single token\n  • a list of tokens separated by comma\n  • a file (.tokens) containing 1 token per line\nif the options is not provided, the environment variable GITHUB_TOKEN is readed, it can be:\n  • a single token\n  • a list of tokens separated by comma" )
 	flag.StringVar( &config.output, "o", "", "output file, default: <domain>.txt" )
 	flag.BoolVar( &config.stop_notoken, "k", false, "exit the program when all tokens have been disabled" )
 	// flag.StringVar( &f_language, "l", "", "language file (optional)" )
