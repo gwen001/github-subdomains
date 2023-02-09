@@ -372,7 +372,11 @@ func main() {
 	config.fpOutput = fp
 	// defer fp.Close()
 
-	u, _ := tld.Parse("http://"+config.domain)
+	u, parseErr := tld.Parse("http://"+config.domain)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(-1)
+	}
 	// fmt.Println(u.Domain)
 	// fmt.Println(u.Subdomain)
 
