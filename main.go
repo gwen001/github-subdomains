@@ -91,7 +91,7 @@ func parseToken( token string ) {
 	}
 
 	var t_tokens = strings.Split(token, ",")
-	var re = regexp.MustCompile(`[0-9a-f]{40}|ghp_[a-zA-Z0-9]{36}`)
+	var re = regexp.MustCompile(`[0-9a-f]{40}|ghp_[a-zA-Z0-9]{36}|github_pat_[_a-zA-Z0-9]{82}`)
 
 	for _,t := range t_tokens {
 		if re.MatchString(t) {
