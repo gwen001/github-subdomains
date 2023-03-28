@@ -16,6 +16,10 @@
 
 ---
 
+## Description
+
+This Go tool performs searches on GitHub and parses the results to find subdomains of a given domain.
+
 ## Install
 
 ```
