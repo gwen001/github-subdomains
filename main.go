@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"fmt"
 	"math"
 	"math/rand"
@@ -77,9 +78,12 @@ func parseToken( token string ) {
 		if token == "" {
 			token = readTokenFromFile(".tokens")
 			if token == "" {
-				flag.Usage()
-				fmt.Printf("\ntoken not found\n")
-				os.Exit(-1)
+				token = readTokenFromGhCli()
+				if token == "" {
+					flag.Usage()
+					fmt.Printf("\ntoken not found\n")
+					os.Exit(-1)
+				}
 			}
 		}
 	} else {
@@ -91,7 +95,7 @@ func parseToken( token string ) {
 	}
 
 	var t_tokens = strings.Split(token, ",")
-	var re = regexp.MustCompile(`[0-9a-f]{40}|ghp_[a-zA-Z0-9]{36}|github_pat_[_a-zA-Z0-9]{82}`)
+	var re = regexp.MustCompile(`[0-9a-f]{40}|ghp_[a-zA-Z0-9]{36}|github_pat_[_a-zA-Z0-9]{82}|gho_[a-zA-Z0-9]{36}`)
 
 	for _,t := range t_tokens {
 		if re.MatchString(t) {
@@ -125,6 +129,17 @@ func readTokenFromFile( tokenfile string ) string {
 	}
 
 	return strings.Join(t_token, ",")
+}
+
+
+func readTokenFromGhCli() string {
+
+	out, err := exec.Command("gh", "auth", "token").Output()
+	if err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(string(out))
 }
 
 
